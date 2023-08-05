@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrello - Negozio di Scacchi</title>
+  <link rel="stylesheet" href="cart.css">
+</head>
+
+<body>
+  <header>
+    <h1>Carrello</h1>
+    <nav>
+      <a href="home.html">Home</a>
+      <a href="products.html">Prodotti</a>
+      <a href="cart.html">Carrello</a>
+    </nav>
+  </header>
+
+  <div class="cart-items">
+    <!-- Placeholder per i prodotti nel carrello -->
+    {{CART_ITEMS_PLACEHOLDER}}
+  </div>
+
+  <div class="cart-total">
+    <!-- Placeholder per il totale del carrello -->
+    {{CART_TOTAL_PLACEHOLDER}}
+  </div>
+
+  <footer class="footer">
+    <p>Tutti i diritti riservati &copy; 2023</p>
+  </footer>
+
+  <!-- Script per interagire con il server -->
+  <script src="cart.js"></script>
+</body>
+
+</html>
