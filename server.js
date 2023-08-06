@@ -1,8 +1,21 @@
+const express = require('express');
 const mysql = require('mysql2');
 const { v4: uuidv4 } = require('uuid');
 
-// Configurazione per la connessione al database
-const connection = mysql.createConnection({
+const app = express();
+app.use(express.json());
+
+// Configurazione per la connessione al database "employees"
+const connectionEmployees = mysql.createConnection({
+  host: 'psedge.global',
+  port: 3306,
+  user: 'fff83ddc-88c5-4f45-bf73-0f2332f4f24c-polyscale',
+  password: 'playground',
+  database: 'employees', // Modifica il nome del database se necessario
+});
+
+// Configurazione per la connessione al database "progetto_negozio_scacchi"
+const connectionProgetto = mysql.createConnection({
   host: 'psedge.global',
   port: 3306,
   user: 'fff83ddc-88c5-4f45-bf73-0f2332f4f24c-polyscale',
@@ -16,7 +29,7 @@ function generateUserId() {
 }
 
 // Funzione per inserire i dati nel carrello di un utente
-function insertCartData(userId, productId, quantity) {
+function insertCartData(connection, userId, productId, quantity) {
   return new Promise((resolve, reject) => {
     connection.query(
       'INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)',
@@ -32,8 +45,8 @@ function insertCartData(userId, productId, quantity) {
   });
 }
 
-// Funzione per ottenere tutti i prodotti dal database
-function getProducts() {
+// Funzione per ottenere tutti i prodotti dal database "progetto_negozio_scacchi"
+function getProducts(connection) {
   return new Promise((resolve, reject) => {
     connection.query('SELECT * FROM products', (error, results) => {
       if (error) {
@@ -45,8 +58,8 @@ function getProducts() {
   });
 }
 
-// Funzione per ottenere i prodotti nel carrello di un utente specifico
-function getCartProducts(userId) {
+// Funzione per ottenere i prodotti nel carrello di un utente specifico dal database "progetto_negozio_scacchi"
+function getCartProducts(connection, userId) {
   return new Promise((resolve, reject) => {
     connection.query(
       'SELECT cart.product_id, products.product_name, products.price, cart.quantity ' +
@@ -65,42 +78,47 @@ function getCartProducts(userId) {
   });
 }
 
-// Esempio di utilizzo per generare utenti e inserire i dati nel carrello
-async function main() {
+// Endpoint API per ottenere i prodotti dal database "progetto_negozio_scacchi"
+app.get('/getProducts', async (req, res) => {
   try {
-    // Connessione al database
-    await connection.promise().connect();
+    // Connessione al database "progetto_negozio_scacchi"
+    await connectionProgetto.promise().connect();
+    console.log('Connessione al database "progetto_negozio_scacchi" avvenuta con successo!');
 
-    // Genera utente e dati del carrello in modo automatico
-    const users = ['user123', 'user456', 'user789']; // Esempio di utenti
-    const products = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]; // Esempio di ID dei prodotti
-    const quantities = [2, 3, 1, 4, 2, 1, 3, 2, 1, 2, 3, 1, 4, 2, 1]; // Esempio di quantità dei prodotti
-
-    for (let i = 0; i < users.length; i++) {
-      const userId = generateUserId();
-      console.log(`Generato ID utente per ${users[i]}: ${userId}`);
-
-      for (let j = 0; j < products.length; j++) {
-        await insertCartData(userId, products[j], quantities[j]);
-        console.log(`Dati inseriti nel carrello per ${users[i]}: ProductID=${products[j]}, Quantity=${quantities[j]}`);
-      }
-    }
-
-    // Ottieni tutti i prodotti
-    const allProducts = await getProducts();
-    console.log('Tutti i prodotti:', allProducts);
-
-    // Ottieni i prodotti nel carrello dell'utente con ID 'user123'
-    const userId = 'user123';
-    const cartProducts = await getCartProducts(userId);
-    console.log(`Prodotti nel carrello dell'utente ${userId}:`, cartProducts);
+    // Ottieni tutti i prodotti dal database
+    const allProducts = await getProducts(connectionProgetto);
+    res.json({ products: allProducts });
   } catch (error) {
     console.error('Si è verificato un errore:', error);
+    res.status(500).json({ error: 'Si è verificato un errore durante il recupero dei prodotti.' });
   } finally {
-    // Chiudi la connessione al database alla fine dell'esecuzione
-    connection.end();
+    // Chiudi la connessione al database alla fine della richiesta
+    connectionProgetto.end();
   }
-}
+});
 
-// Esegui la funzione main per generare gli utenti e inserire i dati nel carrello
-main();
+// Endpoint API per inserire i dati nel carrello
+app.post('/addToCart', async (req, res) => {
+  try {
+    const { userId, productId, quantity } = req.body;
+
+    // Connessione al database "progetto_negozio_scacchi"
+    await connectionProgetto.promise().connect();
+    console.log('Connessione al database "progetto_negozio_scacchi" avvenuta con successo!');
+
+    // Inserisci i dati nel carrello
+    await insertCartData(connectionProgetto, userId, productId, quantity);
+    res.json({ message: 'Dati inseriti correttamente nel carrello.' });
+  } catch (error) {
+    console.error('Si è verificato un errore:', error);
+    res.status(500).json({ error: 'Si è verificato un errore durante l\'inserimento dei dati nel carrello.' });
+  } finally {
+    // Chiudi la connessione al database alla fine della richiesta
+    connectionProgetto.end();
+  }
+});
+
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server avviato su http://localhost:${port}`);
+});

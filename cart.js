@@ -1,11 +1,11 @@
-// Funzione per ottenere i prodotti dal file di testo
-async function getProductsFromFile() {
+// Funzione per ottenere i prodotti dal server
+async function getCartProductsFromServer() {
   try {
     const response = await fetch('/getCartProducts');
     const data = await response.json();
     return data.products;
   } catch (error) {
-    console.error('Errore durante il recupero dei prodotti dal server:', error);
+    console.error('Errore durante il recupero dei prodotti dal carrello:', error);
     return [];
   }
 }
@@ -16,7 +16,7 @@ async function displayCart() {
   const cartTotal = document.querySelector('.cart-total');
 
   // Ottieni i prodotti dal server
-  const selectedProducts = await getProductsFromFile();
+  const selectedProducts = await getCartProductsFromServer();
 
   // Pulisci la lista dei prodotti nel carrello
   cartItems.innerHTML = '';
@@ -27,11 +27,11 @@ async function displayCart() {
     cartItem.classList.add('cart-item');
 
     const productImage = document.createElement('img');
-    productImage.src = product.image;
-    productImage.alt = product.name;
+    productImage.src = product.image_url;
+    productImage.alt = product.product_name;
 
     const productNameElement = document.createElement('h3');
-    productNameElement.textContent = product.name;
+    productNameElement.textContent = product.product_name;
 
     const productPriceElement = document.createElement('span');
     productPriceElement.textContent = `Prezzo: €${product.price.toFixed(2)}`;
@@ -60,7 +60,6 @@ function updateCartTotal(products) {
   cartTotal.textContent = `Totale: €${total.toFixed(2)}`;
 }
 
-// Aggiungi l'evento DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
   displayCart();
 });
