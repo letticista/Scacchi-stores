@@ -54,3 +54,21 @@ footer {
   bottom: 0;
   width: 100%;
 }
+/* ... (il tuo codice CSS esistente) */
+
+footer {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  position: fixed; /* Cambia da "absolute" a "fixed" */
+  bottom: 0;
+  width: 100%;
+  z-index: 1; /* Aggiungi z-index per assicurarti che il footer sia sopra tutto il contenuto */
+}
+
+/* Aggiungi un margine al corpo per evitare che il contenuto venga coperto dal footer */
+body {
+  margin-bottom: 40px; /* Altezza del footer + margine extra */
+}
+
